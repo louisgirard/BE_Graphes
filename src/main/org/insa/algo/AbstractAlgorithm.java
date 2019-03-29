@@ -3,7 +3,7 @@ package org.insa.algo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-//Laura
+//COUCOU LAURA, comment vas-tu ?
 /**
  * Base class for algorithm classes.
  *
