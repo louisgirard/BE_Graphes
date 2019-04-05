@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import javax.swing.SingleSelectionModel;
+
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;

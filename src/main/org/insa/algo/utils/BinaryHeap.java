@@ -144,8 +144,45 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
 
     @Override
     public void remove(E x) throws ElementNotFoundException {
-        // TODO:
+    	boolean found = false;
+    	int index = 0;
+        if (isEmpty()) {
+        	throw new ElementNotFoundException(x);
+        }else {
+        	for(int i = 0; i < this.currentSize; i++) {
+        		if(this.array.get(i).equals(x)) { //element found
+        			found = true;
+        			index = i;
+        		}
+        	}
+        }
+       if(!found) {
+    	   throw new ElementNotFoundException(x);
+       }else {
+	       	this.arraySet(index, this.array.get(this.currentSize - 1));
+	       	this.currentSize--;
+	       	this.percolateUp(index);
+	       	this.percolateDown(index);
+       }
     }
+    
+    
+    /*
+    public E getMin(int index) {
+    	int ileft = this.index_left(index);
+    	int iright = ileft + 1;
+    	//0 fils
+    	if((ileft > this.currentSize)) {//si pas de fils gauche alors pas de fils droit
+    		return this.array.get(index);
+    	}else {
+    		if (this.array.get(ileft).compareTo(this.array.get(iright)) > 0) { //fils gauche plus grand que fils droit
+    			return getMin(ileft);
+    		}else {
+    			return getMin(iright);
+    		}
+    	}
+    }
+	*/
 
     @Override
     public E findMin() throws EmptyPriorityQueueException {
