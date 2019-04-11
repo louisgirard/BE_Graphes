@@ -8,14 +8,14 @@ public class Label {
 	private boolean mark;	
 	private float cost;	
 	private Arc father;
-	
+
 	public Label() {
 		this.currentNode = null;
 		this.mark = false;
 		this.cost = 100000000000000f;
 		this.father = null;		
 	}
-	
+
 	//getter
 	public float getCost() {
 		return this.cost;
@@ -39,5 +39,5 @@ public class Label {
 	public void setMark() {
 		this.mark = true;
 	}
-	
+
 }

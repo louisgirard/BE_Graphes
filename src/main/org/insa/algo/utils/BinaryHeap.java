@@ -166,23 +166,6 @@ public class BinaryHeap<E extends Comparable<E>> implements PriorityQueue<E> {
        }
     }
     
-    
-    /*
-    public E getMin(int index) {
-    	int ileft = this.index_left(index);
-    	int iright = ileft + 1;
-    	//0 fils
-    	if((ileft > this.currentSize)) {//si pas de fils gauche alors pas de fils droit
-    		return this.array.get(index);
-    	}else {
-    		if (this.array.get(ileft).compareTo(this.array.get(iright)) > 0) { //fils gauche plus grand que fils droit
-    			return getMin(ileft);
-    		}else {
-    			return getMin(iright);
-    		}
-    	}
-    }
-	*/
 
     @Override
     public E findMin() throws EmptyPriorityQueueException {
