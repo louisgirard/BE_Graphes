@@ -19,7 +19,7 @@ public class Label implements Comparable<Label> {
 	public Label(Node node) {
 		this.currentNode = node;
 		this.mark = false;
-		this.cost = 100000000000000f;
+		this.cost = (float)Double.POSITIVE_INFINITY;
 		this.father = null;		
 	}
 

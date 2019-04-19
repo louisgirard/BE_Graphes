@@ -1,10 +1,11 @@
 package org.insa.algo.shortestpath;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import org.insa.algo.utils.*;
 import org.insa.graph.*;
+import org.insa.algo.AbstractInputData.Mode;
 import org.insa.algo.AbstractSolution.Status;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
@@ -15,6 +16,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
     @Override
     protected ShortestPathSolution doRun() {
+    	int nbIterations = 0;
+    	
         ShortestPathData data = getInputData();
         
         ShortestPathSolution solution = null;
@@ -29,22 +32,33 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         for (int i = 0; i < data.getGraph().size(); i++) {
         	tabLabel.add(new Label(data.getGraph().get(i)));
         }
-        tabLabel.get(0).setCost(0);
-        labelCourant = tabLabel.get(0); //recupere le sommet
+        tabLabel.get(data.getOrigin().getId()).setCost(0);
+        labelCourant = tabLabel.get(data.getOrigin().getId()); //recupere le sommet
         labelHeap.insert(labelCourant);
+        
+        // Notify observers about the first event (origin processed).
+        notifyOriginProcessed(data.getOrigin());
         
         //tant qu'il existe des sommets non marqués, tant que le tas n'est pas vide
         while(!labelHeap.isEmpty()) {
+        	nbIterations++;
         	labelCourant = labelHeap.deleteMin();
         	//marque le sommet courant à TRUE
         	tabLabel.get(labelCourant.getCurrentNode().getId()).setMark();
         	//on regarde tous les successeurs du sommet/label courant
         	for (Arc a : labelCourant.getCurrentNode().getSuccessors()) {
         		labelFils = tabLabel.get(a.getDestination().getId());
+
+                // Small test to check allowed roads...
+                if (!data.isAllowed(a)) {
+                    continue;
+                }
+                
         		//si la marque du premier successeur du sommet courant est false
         		if (!labelFils.getMark()) {
-        			if (labelFils.getCost() > (labelCourant.getCost() + a.getLength())) {
-        				labelFils.setCost(labelCourant.getCost() + a.getLength());
+        			notifyNodeReached(a.getDestination());
+        			if (labelFils.getCost() > (labelCourant.getCost() + Cost(a, data))) {
+        				labelFils.setCost(labelCourant.getCost() + Cost(a, data));
         				labelHeap.insert(labelFils);
         				labelFils.setFather(a);
         				//mettre dans le tableau de label
@@ -54,22 +68,42 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         	}
         }
         
-        List<Arc> arcs = new ArrayList<Arc>();
-        boolean fin = false;
         
-        labelCourant = tabLabel.get(data.getDestination().getId());
-        while(!fin) {
-    		arcs.add(0, labelCourant.getFather());
-        	if (data.getOrigin().equals(labelCourant.getFather().getOrigin())) {
-        		fin = true;
-        	}else {
-        		labelCourant = tabLabel.get(labelCourant.getFather().getOrigin().getId());
-        	}
+        // Destination has no predecessor, the solution is infeasible...
+        if (tabLabel.get(data.getDestination().getId()).getFather() == null) {
+            solution = new ShortestPathSolution(data, Status.INFEASIBLE);
+        }
+        else {
+            // The destination has been found, notify the observers.
+            notifyDestinationReached(data.getDestination());
+            
+            // Create the path from the array of predecessors...
+            ArrayList<Arc> arcs = new ArrayList<>();
+            Arc arc = tabLabel.get(data.getDestination().getId()).getFather();
+            while (arc != null) {
+                arcs.add(arc);
+                arc = tabLabel.get(arc.getOrigin().getId()).getFather();
+            }
+
+            // Reverse the path...
+            Collections.reverse(arcs);
+
+            // Create the final solution
+            solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(data.getGraph(), arcs));
+            
+            System.out.println("Nb arcs : " + arcs.size() + ", Nb iterations : " + nbIterations);
         }
         
-        //check le feasible, !!!! attention, dijkstra ne marche que pour les valeurs positives !!!!
-        solution = new ShortestPathSolution(data,Status.FEASIBLE,new Path(data.getGraph(),arcs));
+        
         return solution;
+    }
+    
+    protected float Cost(Arc a, ShortestPathData data) {
+    	if (data.getMode() == Mode.TIME) {
+    		return (float)a.getMinimumTravelTime();
+    	}else { //Mode.LENGTH
+    		return a.getLength();
+    	}
     }
 
 }
