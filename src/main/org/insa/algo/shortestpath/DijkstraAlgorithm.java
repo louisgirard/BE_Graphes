@@ -91,7 +91,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             // Create the final solution
             solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(data.getGraph(), arcs));
             
-            System.out.println("Nb arcs : " + arcs.size() + ", Nb iterations : " + nbIterations);
+            //System.out.println("Nb arcs : " + arcs.size() + ", Nb iterations : " + nbIterations);
         }
         
         
