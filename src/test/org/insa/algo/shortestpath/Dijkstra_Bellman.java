@@ -34,7 +34,8 @@ public class Dijkstra_Bellman {
     // List of nodes
     private static Node[] nodes;
 
-    private String mapsLocation = "/home/louis/Documents/INSA/map-BE_Graphes";
+    //private String mapsLocation = "/home/louis/Documents/INSA/map-BE_Graphes";
+    private String mapsLocation = "/home/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps";
     
     @BeforeClass
     public static void initAll() throws IOException {
@@ -64,7 +65,7 @@ public class Dijkstra_Bellman {
 
     }
     
-    @Test
+    //@Test
     public void testDoRun() {
     	for (Node origine : graph.getNodes()) {
     		System.out.print("x" + (origine.getId() + 1) + " : ");
@@ -106,8 +107,62 @@ public class Dijkstra_Bellman {
     	
     }
     
-    //procedure generale permettant de tester differents scenarios
-	public void testScenario(String mapName, int typeEvaluation, int origine, int destination) throws Exception{
+    //procedure generale permettant de tester differents scenarios sans comparer
+   	public void testScenario1(String mapName, int typeEvaluation, int origine, int destination) throws Exception{
+   		//typeEvaluation : 0 = temps, 1 = distance
+   		
+           // Create a graph reader.
+           GraphReader reader = new BinaryGraphReader(
+                   new DataInputStream(new BufferedInputStream(new FileInputStream(mapName))));
+           // Read the graph.
+           Graph graph = reader.read();
+           
+           if ((typeEvaluation != 0 && typeEvaluation != 1) || origine < 0 || origine >= graph.size() || destination < 0 || destination >= graph.size()) {
+           	System.out.println("Arguments non valides");
+           	throw new Exception();
+           }else {
+           	System.out.println("Origine : " + origine);
+           	System.out.println("Destination : " + destination);
+           	//si l'origine et la destination sont les mêmes sommets 
+   			if (origine == destination) {
+   				System.out.print("Origine = Destination, cout nul");
+   			}else {
+   	        	ArcInspector arcInspector;
+   	        	//0 = temps, 1 = distance
+   	        	if (typeEvaluation == 0) {
+   	        		arcInspector = new ArcInspectorFactory().getAllFilters().get(2);
+   	        	}else {
+   	        		arcInspector = new ArcInspectorFactory().getAllFilters().get(0);
+   	        	}
+   				ShortestPathData data = new ShortestPathData(graph,graph.get(origine),graph.get(destination),arcInspector);
+   				
+   		
+   				DijkstraAlgorithm dijkstraAlgo = new DijkstraAlgorithm(data);
+   				
+   				
+   				ShortestPathSolution solutionDijkstra = dijkstraAlgo.doRun();
+   				
+   				//si le path de la solution n'existe pas alors il n'y pas de solution
+   				if (solutionDijkstra.getPath() == null) {
+   					System.out.println("Pas de solution");
+   				}else {
+   					//on vérifie que les couts sont egaux
+   					double costDijkstra;
+   					if (typeEvaluation == 0) { //temps
+   						costDijkstra = solutionDijkstra.getPath().getMinimumTravelTime();
+   					}else { //distance
+   						costDijkstra = solutionDijkstra.getPath().getLength();
+   					}
+   					assertTrue(solutionDijkstra.getPath().isValid());
+   					System.out.println("Cout de la solution : " + costDijkstra);	
+   				}
+   			}
+           }
+           System.out.println();
+   	}
+    
+    //procedure generale permettant de tester differents scenarios en comparant avec bellman
+	public void testScenario2(String mapName, int typeEvaluation, int origine, int destination) throws Exception{
 		//typeEvaluation : 0 = temps, 1 = distance
 		
         // Create a graph reader.
@@ -157,15 +212,30 @@ public class Dijkstra_Bellman {
 						costDijkstra = solutionDijkstra.getPath().getLength();
 					}
 					assertEquals(costBellman,costDijkstra,0.001);
-					System.out.println("Cout de la solution : " + costDijkstra);		
+					System.out.println("Cout de la solution : " + costDijkstra);	
 				}
 			}
         }
         System.out.println();
 	}
 	
+	//Test Caractéristiques des solutions obtenues 1.3
+	/*
 	@Test
 	public void testTempsCarreDense() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : Carre Dense--");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/carre-dense.mapgr";
+		int origine = 20;
+		int destination = 1550;
+		
+		testScenario1(mapName,0,origine,destination);
+	}
+	
+	@Test
+	public void testTempsCarreDenseCheminNul() throws Exception{
 		System.out.println("--Test--");
 		System.out.println("--Map : Carre Dense--");
 		System.out.println("--Type Evaluation : Temps--");
@@ -174,7 +244,128 @@ public class Dijkstra_Bellman {
 		int origine = 0;
 		int destination = 0;
 		
-		testScenario(mapName,0,origine,destination);
+		testScenario1(mapName,0,origine,destination);
 	}
+
+	@Test
+	public void testTempsGuadeloupeNonExistant() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : La Guadeloupe --");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/guadeloupe.mapgr";
+		int origine = 32934;
+		int destination = 16045;
+		
+		testScenario1(mapName,0,origine,destination);
+	}
+	
+	@Test
+	public void testDistanceGuadeloupeNonExistant() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : La Guadeloupe --");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/guadeloupe.mapgr";
+		int origine = 32934;
+		int destination = 16045;
+		
+		testScenario1(mapName,1,origine,destination);
+	} */
+	
+	//Tests d’optimalité avec oracle
+	//@Test
+	public void testTempsCarreDense() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : Carre Dense--");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/carre-dense.mapgr";
+		int origine = 20;
+		int destination = 1550;
+		
+		testScenario2(mapName,0,origine,destination);
+	}
+	
+	@Test
+	public void testTempsCarreDenseCheminNul() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : Carre Dense--");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/carre-dense.mapgr";
+		int origine = 0;
+		int destination = 0;
+		
+		testScenario2(mapName,0,origine,destination);
+	}
+
+	@Test
+	public void testTempsGuadeloupeNonExistant() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : La Guadeloupe --");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/guadeloupe.mapgr";
+		int origine = 32934;
+		int destination = 16045;
+		
+		testScenario2(mapName,0,origine,destination);
+	}
+	
+	@Test
+	public void testDistanceGuadeloupe() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : La Guadeloupe --");
+		System.out.println("--Type Evaluation : Distance--");
+		
+		String mapName = mapsLocation + "/guadeloupe.mapgr";
+		int origine = 29344;
+		int destination = 13911;
+		
+		testScenario2(mapName,1,origine,destination);
+	}
+
+	public void testAleatoireTempsToulouse() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : Toulouse--");
+		System.out.println("--Type Evaluation : Temps--");
+		
+		String mapName = mapsLocation + "/toulouse.mapgr";
+		double max = 35000;
+		double min = 0;
+		
+		int origine = (int)(Math.random() * (max - min));
+		int destination = (int)(Math.random() * (max - min));
+		
+		testScenario2(mapName,0,origine,destination);
+	}
+	
+	public void testAleatoireDistanceToulouse() throws Exception{
+		System.out.println("--Test--");
+		System.out.println("--Map : Toulouse--");
+		System.out.println("--Type Evaluation : Distance--");
+		
+		String mapName = mapsLocation + "/toulouse.mapgr";
+		double max = 35000;
+		double min = 0;
+		
+		int origine = (int)(Math.random() * (max - min));
+		int destination = (int)(Math.random() * (max - min));
+		
+		testScenario2(mapName,1,origine,destination);
+	}
+	
+	@Test
+	public void testsAleatoiresToulouse() throws Exception{
+		for (int i = 0; i < 5; i++) {
+			testAleatoireTempsToulouse();
+		}
+		for (int i = 0; i < 5; i++) {
+			testAleatoireDistanceToulouse();
+		}
+	}
+	
+	
 
 }
