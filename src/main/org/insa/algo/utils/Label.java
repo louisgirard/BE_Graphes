@@ -6,25 +6,25 @@ import org.insa.graph.Node;
 public class Label implements Comparable<Label> {
 	private Node currentNode;	
 	private boolean mark;	
-	private float cost;	
+	private double cost;	
 	private Arc father;
 
 	public Label() {
 		this.currentNode = null;
 		this.mark = false;
-		this.cost = 100000000000000f;
-		this.father = null;		
+		this.cost = Double.POSITIVE_INFINITY;
+		this.father = null;	
 	}
 	
 	public Label(Node node) {
 		this.currentNode = node;
 		this.mark = false;
-		this.cost = (float)Double.POSITIVE_INFINITY;
+		this.cost = Double.POSITIVE_INFINITY;
 		this.father = null;		
 	}
 
 	//getter
-	public float getCost() {
+	public double getCost() {
 		return this.cost;
 	}
 	public Node getCurrentNode(){
@@ -36,8 +36,11 @@ public class Label implements Comparable<Label> {
 	public Arc getFather() {
 		return this.father;
 	}
+	public double getTotalCost() {
+		return this.cost;
+	}
 	//setter
-	public void setCost(float cost) {
+	public void setCost(double cost) {
 		this.cost = cost;
 	}
 	public void setCurrentNode(Node node) {
@@ -51,11 +54,11 @@ public class Label implements Comparable<Label> {
 	}
 
 	public int compareTo(Label l) {
-		if (this.cost < l.getCost()) {
+		if (getTotalCost() < l.getTotalCost()) {
 			return -1;
-		}else if (this.cost == l.getCost()) {
+		}else if (getTotalCost() == l.getTotalCost()) {
 			return 0;
-		}else { //this.cost > l.getCost()
+		}else { //this.cost > l.getTotalCost()
 			return 1;
 		}
 	}

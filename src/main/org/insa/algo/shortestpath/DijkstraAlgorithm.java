@@ -98,9 +98,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         return solution;
     }
     
-    protected float Cost(Arc a, ShortestPathData data) {
+    protected double Cost(Arc a, ShortestPathData data) {
     	if (data.getMode() == Mode.TIME) {
-    		return (float)a.getMinimumTravelTime();
+    		return a.getMinimumTravelTime();
     	}else { //Mode.LENGTH
     		return a.getLength();
     	}
