@@ -16,7 +16,8 @@ public class LabelStar extends Label {
 	public LabelStar(Node node, ShortestPathData data) {
 		super(node);
 		if (data.getMode() == Mode.TIME) {
-			this.costEstimated = node.getPoint().distanceTo(data.getDestination().getPoint())/data.getMaximumSpeed();
+			double speed = Math.max(data.getMaximumSpeed(), data.getGraph().getGraphInformation().getMaximumSpeed())*1000.0/3600.0;
+			this.costEstimated = node.getPoint().distanceTo(data.getDestination().getPoint())/speed;
 		}else {
 			this.costEstimated = node.getPoint().distanceTo(data.getDestination().getPoint());
 		}
