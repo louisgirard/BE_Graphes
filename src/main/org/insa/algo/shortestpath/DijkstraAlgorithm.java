@@ -40,7 +40,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         notifyOriginProcessed(data.getOrigin());
         
         //tant qu'il existe des sommets non marqués, tant que le tas n'est pas vide
-        while(!labelHeap.isEmpty()) {
+        while(!labelHeap.isEmpty() && !labelCourant.getCurrentNode().equals(data.getDestination())) {
         	nbIterations++;
         	labelCourant = labelHeap.deleteMin();
         	//marque le sommet courant à TRUE

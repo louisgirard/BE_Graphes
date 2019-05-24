@@ -34,8 +34,8 @@ public class AStarTest {
     // List of nodes
     private static Node[] nodes;
 
-    private String mapsLocation = "/home/louis/Documents/INSA/map-BE_Graphes";
-    //private String mapsLocation = "/home/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps";
+    //private String mapsLocation = "/home/louis/Documents/INSA/map-BE_Graphes";
+    private String mapsLocation = "/home/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps";
     
     @BeforeClass
     public static void initAll() throws IOException {
@@ -358,6 +358,7 @@ public class AStarTest {
 	
 	@Test
 	public void testsAleatoiresToulouse() throws Exception{
+		System.out.println("--Tests Aléatoires--");
 		for (int i = 0; i < 5; i++) {
 			testAleatoireTempsToulouse();
 		}
