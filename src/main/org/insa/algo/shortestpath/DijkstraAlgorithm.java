@@ -5,18 +5,23 @@ import java.util.Collections;
 
 import org.insa.algo.utils.*;
 import org.insa.graph.*;
-import org.insa.algo.AbstractInputData.Mode;
 import org.insa.algo.AbstractSolution.Status;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
-
+	
+	private long cpuTime = 0;
+	private int nbExplores = 0;	
+	private int nbMarques = 0;	
+	private int maxTas = 0;
+	
     public DijkstraAlgorithm(ShortestPathData data) {
         super(data);
     }
 
     @Override
     protected ShortestPathSolution doRun() {
-    	int nbIterations = 0;
+    	long cpuTime = 0;
+    	int maxTas = 0;
     	
         ShortestPathData data = getInputData();
         
@@ -25,12 +30,12 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         BinaryHeap<Label> labelHeap = new BinaryHeap<Label>();
         ArrayList<Label> tabLabel = new ArrayList<Label>();
         
-        Label labelCourant = new Label();
-        Label labelFils = new Label();
+        Label labelCourant = newLabel();
+        Label labelFils = newLabel();
         
         //initialisation
         for (int i = 0; i < data.getGraph().size(); i++) {
-        	tabLabel.add(new Label(data.getGraph().get(i)));
+        	tabLabel.add(newLabel(data.getGraph().get(i),data));
         }
         tabLabel.get(data.getOrigin().getId()).setCost(0);
         labelCourant = tabLabel.get(data.getOrigin().getId()); //recupere le sommet
@@ -39,15 +44,23 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         // Notify observers about the first event (origin processed).
         notifyOriginProcessed(data.getOrigin());
         
+        cpuTime = System.nanoTime();
+        
         //tant qu'il existe des sommets non marqués, tant que le tas n'est pas vide
         while(!labelHeap.isEmpty() && !labelCourant.getCurrentNode().equals(data.getDestination())) {
-        	nbIterations++;
+        	maxTas = labelHeap.size();
+        	if (this.maxTas < maxTas) {
+        		this.maxTas = maxTas;
+        	}
         	labelCourant = labelHeap.deleteMin();
+        	this.nbExplores++;
         	//marque le sommet courant à TRUE
         	tabLabel.get(labelCourant.getCurrentNode().getId()).setMark();
+        	this.nbMarques++;
         	//on regarde tous les successeurs du sommet/label courant
         	for (Arc a : labelCourant.getCurrentNode().getSuccessors()) {
         		labelFils = tabLabel.get(a.getDestination().getId());
+            	this.nbExplores++;
 
                 // Small test to check allowed roads...
                 if (!data.isAllowed(a)) {
@@ -57,8 +70,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         		//si la marque du premier successeur du sommet courant est false
         		if (!labelFils.getMark()) {
         			notifyNodeReached(a.getDestination());
-        			if (labelFils.getCost() > (labelCourant.getCost() + Cost(a, data))) {
-        				labelFils.setCost(labelCourant.getCost() + Cost(a, data));
+        			if (labelFils.getCost() > (labelCourant.getCost() + data.getCost(a))) {
+        				labelFils.setCost(labelCourant.getCost() + data.getCost(a));
         				labelHeap.insert(labelFils);
         				labelFils.setFather(a);
         				//mettre dans le tableau de label
@@ -68,6 +81,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         	}
         }
         
+        this.cpuTime = System.nanoTime() - cpuTime;
         
         // Destination has no predecessor, the solution is infeasible...
         if (tabLabel.get(data.getDestination().getId()).getFather() == null) {
@@ -91,19 +105,34 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             // Create the final solution
             solution = new ShortestPathSolution(data, Status.OPTIMAL, new Path(data.getGraph(), arcs));
             
-            //System.out.println("Nb arcs : " + arcs.size() + ", Nb iterations : " + nbIterations);
         }
         
         
         return solution;
     }
     
-    protected double Cost(Arc a, ShortestPathData data) {
-    	if (data.getMode() == Mode.TIME) {
-    		return a.getMinimumTravelTime();
-    	}else { //Mode.LENGTH
-    		return a.getLength();
-    	}
+    protected Label newLabel(Node node, ShortestPathData data) {
+		return new Label(node);
+	}
+    
+    protected Label newLabel() {
+		return new Label();
+	}
+    
+    public long getCpuTime() {
+    	return cpuTime;
+    }
+    
+    public int getNbExplores() {
+    	return nbExplores;
+    }
+    
+    public int getNbMarques() {
+    	return nbMarques;
+    }
+    
+    public int getMaxTas() {
+    	return maxTas;
     }
 
 }
