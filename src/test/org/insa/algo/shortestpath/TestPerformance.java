@@ -3,6 +3,7 @@ package org.insa.algo.shortestpath;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Scanner;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
@@ -16,12 +17,14 @@ import org.insa.graph.Graph;
 import org.insa.graph.io.BinaryGraphReader;
 import org.insa.graph.io.GraphReader;
 import org.junit.Test;
-import java.io.FileNotFoundException;
 
 public class TestPerformance {
 
-    private String mapsLocation = "/home/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/";
-    private String pathLocation = "/home/lgirard/BE_Graphes/tests_performance/";
+    //private String mapsLocation = "/home/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/";
+    //private String pathLocation = "/home/lgirard/BE_Graphes/tests_performance/";
+    
+    private String mapsLocation = "/home/louis/Documents/INSA/map-BE_Graphes/";
+    private String pathLocation = "/home/louis/Documents/INSA/BE_Graphes/tests_performance/";
     
     //créer un fichier avec le bon nom
 	public String createFile(String filePath, String map, int type, int nbPaires, int dataType) throws IOException{
@@ -49,10 +52,25 @@ public class TestPerformance {
 		}
 		
 		File file = new File(filePath + name);
-		file.createNewFile();
 		
-        System.out.println("Fichier créé");
-        
+		if (dataType == 0) { //type = data.txt
+			if (file.createNewFile()) { //si le fichier n'existe pas
+		        System.out.println("Fichier " + name + " créé");
+			}else { //si le fichier existe on demande si on veut remplacer les tests
+				System.out.println("Fichier " + name + " existe déjà, voulez-vous créer de nouvelles données de test et remplacer ce fichier ? (y/n)");
+				Scanner sc = new Scanner(System.in);
+				if (sc.nextLine() == "y") {
+					System.out.println("De nouvelles données de test vont être créées");
+				}else {
+					System.out.println("Annulation de la création de nouvelles données de test");
+					name = "0"; //pour indiquer qu'il ne faut pas faire les tests
+				}
+			}
+		}else {
+			file.createNewFile();
+	        System.out.println("Fichier " + name + " créé");
+		}
+		
         return name;
 	}
 	
@@ -63,14 +81,16 @@ public class TestPerformance {
 		String fileName;
 		fileName = createFile(pathLocation,map,type,nbPaires,0);
 		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLocation + fileName));
-	    writer.write(map + "\n" + type + "\n" + nbPaires + "\n");
-	    for (int i = 0; i < nbPaires; i++) {
-			origine = (int)(Math.random() * (max - min));
-			destination = (int)(Math.random() * (max - min));
-			writer.write(origine + " " + destination + "\n");
-	    }
-	    writer.close();
+		if (fileName != "0") {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(pathLocation + fileName));
+		    writer.write(map + "\n" + type + "\n" + nbPaires + "\n");
+		    for (int i = 0; i < nbPaires; i++) {
+				origine = (int)(Math.random() * (max - min));
+				destination = (int)(Math.random() * (max - min));
+				writer.write(origine + " " + destination + "\n");
+		    }
+		    writer.close();
+		}
 	    
 	    return fileName;
 	}
@@ -130,10 +150,11 @@ public class TestPerformance {
 			destination = Integer.parseInt(nodes[1]);
 			
 			// Create a graph reader.
-           GraphReader reader = new BinaryGraphReader(
-                   new DataInputStream(new BufferedInputStream(new FileInputStream(mapsLocation + map + ".mapgr"))));
-           // Read the graph.
-           Graph graph = reader.read();
+            GraphReader reader = new BinaryGraphReader(
+                    new DataInputStream(new BufferedInputStream(new FileInputStream(mapsLocation + map + ".mapgr"))));
+            // Read the graph.
+            Graph graph = reader.read();
+            
 
 	       	ArcInspector arcInspector;
 	       	//0 = distance, 1 = temps
@@ -186,15 +207,27 @@ public class TestPerformance {
 	}
 	
 	@Test
-	public void createFile() {
-		String map = "toulouse";
+	public void createFile() throws IOException {
+		String map;
 		String fileNameData;
-		try {
-			fileNameData = generateFileTestData(map,0,10,35000,0);
+		
+		//test 1, 50 tests en distance sur toulouse
+		map = "toulouse";
+		fileNameData = generateFileTestData(map,0,50,35000,0);
+		if (fileNameData != "0")
 			generateFileTest(fileNameData);
-		}catch(IOException e) {
-			//do nothing
-		}
+		
+		//test 2, 10 tests en distance sur carre-dense
+		map = "carre-dense";        
+		fileNameData = generateFileTestData(map,0,10,350000,0);
+		if (fileNameData != "0")
+			generateFileTest(fileNameData);
+		
+		//test 3, 50 tests en temps sur belgium
+		map = "belgium";                
+		fileNameData = generateFileTestData(map,1,50,1000000,0);
+		if (fileNameData != "0")
+			generateFileTest(fileNameData);
 		
 	}
 	

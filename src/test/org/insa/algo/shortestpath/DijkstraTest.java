@@ -27,7 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class Dijkstra_Bellman {
+public class DijkstraTest {
 	  // Small graph use for tests
     private static Graph graph;
 
